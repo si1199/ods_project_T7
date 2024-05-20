@@ -4,12 +4,12 @@ ODS - T7 - Renewable energies
 
 Dataset: Hourly energy demand generation and weather (Energy + Weather)
 1. https://www.kaggle.com/datasets/nicholasjhana/energy-consumption-generation-prices-and-weather
-2. https://www.kaggle.com/datasets/belayethossainds/renewable-energy-world-wide-19652022 -------> ver
+
 
 
 7. Até 2030, aumentar substancialmente a participação de energias renováveis na matriz energética global
 Indicadores
 7.2.1 Peso das energias renováveis no consumo total final de energia
-   1º dataset trata da demand e forecast de energia consoante as condições metereologicas
-   2º produção de energia renovável ---- In 2023, Spain achieved a significant milestone in renewable energy generation, with over 50% of its electricity coming from renewable sources.
+
+   
    
