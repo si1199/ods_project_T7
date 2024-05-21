@@ -1,0 +1,5 @@
+Project was divided in the following steps:
+1) Dataset profiling & Data cleansing
+    1.1) Dataset profiling using Zeppeling notebook and Pydeequ library
+    1.2) Data cleansing using Pandas library
+    
