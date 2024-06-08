@@ -1,0 +1,160 @@
+import pandas as pd
+import os
+from sqlalchemy import create_engine
+import psycopg2
+
+# Change to the correct directory
+os.chdir(r'C:\Users\Silvia Silva\Desktop\code_data_rands')
+
+# Read the CSV file into a DataFrame
+df = pd.read_csv("energy_clean.csv", header=0,delimiter=';')
+df_2 = pd.read_excel("weather_clean.xlsx")
+
+
+df['timestamp'] = pd.to_datetime(df['time'])
+df_2['timestamp'] = pd.to_datetime(df_2['dt_iso'])
+
+# Merge data on the timestamp
+merged_data = pd.merge(df, df_2, on='timestamp', how='inner')
+# Convert columns to numeric, coercing errors to NaN
+merged_data['generation solar'] = pd.to_numeric(merged_data['generation solar'], errors='coerce')
+merged_data['temp'] = pd.to_numeric(merged_data['temp'], errors='coerce')
+merged_data['humidity'] = pd.to_numeric(merged_data['humidity'], errors='coerce')
+
+
+
+'''print("Checking for remaining NaN values in the dataset:")
+print(merged_data.isna().sum())
+
+# Check data types and some sample data
+print("Data types of the merged data:")
+print(merged_data.dtypes)
+
+print("Sample data from the merged dataset:")
+print(merged_data.head())
+print("Checking for remaining NaN values in the dataset:")
+print(merged_data.isna().sum())
+
+# Check data types and some sample data
+print("Data types of the merged data:")
+print(merged_data.dtypes)
+
+print("Sample data from the merged dataset:")
+print(merged_data.head())
+
+
+# Handle missing values (example: fill with mean)
+merged_data.fillna(merged_data.mean(), inplace=True)''' #to check for missing values with joined df's
+
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_absolute_error
+'''
+# Define features and target
+features = merged_data[['temp', 'humidity']]  # example weather features to analyse
+target = merged_data['generation solar']
+
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(features, target, test_size=0.2, random_state=42)
+
+# Train the model
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# Predict and evaluate
+predictions = model.predict(X_test)
+mae = mean_absolute_error(y_test, predictions)
+
+print(f'Mean Absolute Error: {mae}')
+
+# Add predictions to the merged_data dataframe
+merged_data['predicted_energy_production'] = model.predict(features)
+
+import matplotlib.pyplot as plt
+
+# Plot actual vs. predicted values
+plt.scatter(y_test, predictions)
+plt.xlabel('Actual')
+plt.ylabel('Predicted')
+plt.title('Actual vs. Predicted Solar Energy Generation')
+plt.show() '''
+
+
+import pandas as pd
+
+# Drop non-numeric and irrelevant columns
+#merged_data_numeric = merged_data.drop(columns=['timestamp', 'weather_main', 'weather_description', 'weather_icon'])
+
+# Convert 'generation solar' to numeric
+merged_data['generation solar'] = pd.to_numeric(merged_data['generation solar'], errors='coerce')
+
+# Drop 'generation solar' and categorical weather features for correlation calculation
+#merged_data_numeric = merged_data_numeric.drop(columns=['city_name','weather_main', 'weather_description', 'weather_icon'])
+
+# Calculate correlation coefficients between weather features and solar generation
+solar_corr = merged_data.corr()['generation solar'].sort_values(ascending=False)
+
+# Select top 3 weather features for solar generation
+top_solar_features = solar_corr[1:4]  # Exclude 'generation solar' and select top 3
+print("Top 3 weather features impacting solar generation:")
+print(top_solar_features)
+
+
+
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Set figure size
+plt.figure(figsize=(12, 8))
+
+# Create a box plot for solar generation vs. weather_main categories at different temperature levels
+sns.boxplot(x='weather_main', y='generation solar', data=merged_data)
+plt.title('Solar Generation by Weather Conditions')
+plt.xlabel('Weather Conditions')
+plt.ylabel('Solar Generation')
+plt.xticks(rotation=45)
+plt.show()
+
+
+# Scatter plot of temperature vs. solar generation
+plt.figure(figsize=(10, 6))
+sns.scatterplot(x='temp', y='generation solar',data=merged_data[merged_data['weather_main'] == 'clear'])
+plt.title('Temperature vs. Solar Generation')
+plt.xlabel('Temperature (K)')
+plt.ylabel('Solar Generation (MW)')
+plt.grid(True)
+plt.show()
+
+# Heatmap of correlation between features
+plt.figure(figsize=(8, 6))
+sns.heatmap(merged_data[['temp', 'humidity', 'generation solar']].corr(), annot=True, cmap='coolwarm', fmt=".2f")
+plt.title('Correlation Heatmap')
+plt.show()
+
+#wind analysis --- not correlated with wind direction / speed
+plt.figure(figsize=(10, 6))
+sns.scatterplot(x='wind_deg', y='generation wind onshore', data=merged_data)
+plt.title('Wind Direction vs. Wind Generation onshore')
+plt.xlabel('Wind Direction')
+plt.ylabel('Wind Generation onshore (MW)')
+plt.grid(True)
+plt.show()
+
+plt.figure(figsize=(10, 6))
+sns.scatterplot(x='wind_speed', y='generation wind onshore', data=merged_data)
+plt.title('Wind Speed vs. Wind Generation onshore')
+plt.xlabel('Wind Speed')
+plt.ylabel('Wind Generation onshore (MW)')
+plt.grid(True)
+plt.show()
+
+
+# Heatmap of correlation between features
+plt.figure(figsize=(8, 6))
+sns.heatmap(merged_data[['wind_speed', 'wind_deg', 'generation wind onshore']].corr(), annot=True, cmap='coolwarm', fmt=".2f")
+plt.title('Correlation Heatmap')
+plt.show()
+
+
+
